@@ -37,6 +37,9 @@ $ npm install
 # development
 $ npm run start
 
+# spins Postgres 16 on localhost:5432
+$ docker compose up -d
+
 # watch mode
 $ npm run start:dev
 
@@ -96,3 +99,65 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+## Example: Run PostgreSQL 16 in Docker
+
+Create a file called `docker-compose.yml` in your project root:
+
+```yaml
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: streple
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
+
+```
+
+Then open a terminal and run:
+
+```bash
+docker compose up -d
+```
+
+✅ This will:
+
+- Download the official PostgreSQL 16 image (if not already cached)
+- Start a container named `streple-db`
+- Expose port `5432` so you can connect to it locally
+- Create a database called `streple` with user `postgres` and password `postgres`
+
+✅ How to confirm it's running
+
+Run:
+
+```bash
+docker ps
+```
+
+You'll see something like:
+
+```nginx
+CONTAINER ID   IMAGE          PORTS                    NAMES
+abc123         postgres:16    0.0.0.0:5432->5432/tcp   streple-db
+
+```
+
+🧼 To stop/remove the database:
+
+```bash
+docker compose down          # stops and removes the container
+docker compose down -v       # also removes the stored volume (DB wiped)
+
+```
