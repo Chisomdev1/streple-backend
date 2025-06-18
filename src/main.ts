@@ -10,8 +10,8 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   const config = new DocumentBuilder()
-    .setTitle('Strepple API')
-    .setDescription('Auto-generated Swagger OpenAPI spec')
+    .setTitle('Streple Copy-Trading API')
+    .setDescription('Demo trading & copy-trading endpoints')
     .setVersion('1.0')
     .addBearerAuth()
     .build();

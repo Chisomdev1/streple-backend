@@ -218,8 +218,8 @@ paths:
       summary: Close a trade (admin/cron/demo)
       tags: *a6
 info:
-  title: Strepple API
-  description: Auto-generated Swagger OpenAPI spec
+  title: Streple Copy-Trading API
+  description: Demo trading & copy-trading endpoints
   version: "1.0"
   contact: {}
 tags: []
