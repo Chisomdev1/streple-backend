@@ -3,6 +3,13 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from '../users/dto/login.dto';
+import { Role } from 'src/users/enums/role.enum';
+
+export interface JwtPayload {
+  sub: string;
+  email: string;
+  role: Role;
+}
 
 @Injectable()
 export class AuthService {
@@ -18,7 +25,8 @@ export class AuthService {
     }
 
     const user = await this.users.create(dto);
-    return this.makeJwt(user.id);
+    const payload = { sub: user.id, email: user.email, role: user.role };
+    return this.makeJwt(payload);
   }
 
   async login(dto: LoginDto) {
@@ -26,12 +34,13 @@ export class AuthService {
     if (!user || !(await user.validatePassword(dto.password))) {
       throw new UnauthorizedException('Bad credentials');
     }
-    return this.makeJwt(user.id);
+    const payload = { sub: user.id, email: user.email, role: user.role };
+    return this.makeJwt(payload);
   }
 
-  private makeJwt(id: string) {
+  private makeJwt(payload: JwtPayload) {
     return {
-      access_token: this.jwt.sign({ sub: id }),
+      access_token: this.jwt.sign(payload),
       token_type: 'Bearer',
       expires_in: process.env.JWT_EXPIRES,
     };

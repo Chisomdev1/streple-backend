@@ -1,14 +1,17 @@
 import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
-import { PassportModule } from '@nestjs/passport';
-import { UsersModule } from '../users/users.module';
 import { AuthService } from './auth.service';
+import { UsersModule } from '../users/users.module';
+import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
+import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { CopyTradingModule } from 'src/copy-trading/copy-trading.module';
 
 @Module({
   imports: [
+    UsersModule,
+    CopyTradingModule,
     PassportModule,
     ConfigModule,
     JwtModule.registerAsync({
@@ -21,9 +24,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         },
       }),
     }),
-    UsersModule,
   ],
   providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
+  exports: [AuthService, JwtModule],
 })
 export class AuthModule { }
