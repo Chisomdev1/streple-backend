@@ -1,0 +1,307 @@
+openapi: 3.0.0
+paths:
+  /users/me:
+    get:
+      operationId: UsersController_me
+      parameters: []
+      responses:
+        "200":
+          description: Decoded JWT payload
+      security: &a1
+        - bearer: []
+      summary: Current user basic JWT payload
+      tags: &a2
+        - Users
+  /users/profile:
+    get:
+      operationId: UsersController_profile
+      parameters: []
+      responses:
+        "200":
+          description: Returns detailed user profile
+      security: *a1
+      summary: Full profile
+      tags: *a2
+  /users/toggle-role:
+    patch:
+      operationId: UsersController_toggle
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ToggleRoleDto"
+      responses:
+        "200":
+          description: User role updated
+      security: *a1
+      summary: Switch between PRO_TRADER / FOLLOWER
+      tags: *a2
+  /users/dashboard:
+    get:
+      operationId: UsersController_dashboard
+      parameters: []
+      responses:
+        "200":
+          description: Returns user trading dashboard info
+      security: *a1
+      summary: Dashboard overview
+      tags: *a2
+  /users/demo-balance:
+    get:
+      operationId: UsersController_demoFunding
+      parameters: []
+      responses:
+        "200":
+          description: Returns user funding balance
+      security: *a1
+      summary: Funding account balance
+      tags: *a2
+  /users/demo-balance/top-up:
+    patch:
+      operationId: UsersController_topUp
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TopUpDto"
+      responses:
+        "200":
+          description: Balance updated successfully
+      security: *a1
+      summary: Top-up funding balance (DEMO)
+      tags: *a2
+  /users/wallets:
+    get:
+      operationId: UsersController_wallets
+      parameters: []
+      responses:
+        "200":
+          description: Returns wallet balances grouped by trader
+      security: *a1
+      summary: Per-pro copy wallets
+      tags: *a2
+  /auth/register:
+    post:
+      operationId: AuthController_register
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserDto"
+      responses:
+        "201":
+          description: Returns JWT token
+      summary: Register new account
+      tags: &a3
+        - Auth
+  /auth/login:
+    post:
+      operationId: AuthController_login
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginDto"
+      responses:
+        "200":
+          description: Returns JWT token
+      summary: Login
+      tags: *a3
+  /copy/signals:
+    post:
+      operationId: CopyTradingController_publish
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignalDto"
+      responses:
+        "201":
+          description: Signal published successfully
+      security: &a4
+        - bearer: []
+      summary: Pro trader publishes signal
+      tags: &a5
+        - CopyTrading
+  /copy/subscribe:
+    post:
+      operationId: CopyTradingController_subscribe
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubscribeDto"
+      responses:
+        "201":
+          description: Subscription created successfully
+      security: *a4
+      summary: Follower allocates funds to pro
+      tags: *a5
+  /copy/execute:
+    post:
+      operationId: CopyTradingController_execute
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExecuteDto"
+      responses:
+        "201":
+          description: Trade executed successfully
+      security: *a4
+      summary: Follower executes a signal
+      tags: *a5
+  /copy/wallets:
+    get:
+      operationId: CopyTradingController_wallets
+      parameters: []
+      responses:
+        "200":
+          description: Returns copy wallet per trader
+      security: *a4
+      summary: Follower copy wallets
+      tags: *a5
+  /copy/history:
+    get:
+      operationId: CopyTradingController_history
+      parameters: []
+      responses:
+        "200":
+          description: Returns trade history with details
+      security: *a4
+      summary: Follower trade history
+      tags: *a5
+  /copy/close/{tradeId}:
+    patch:
+      operationId: CopyTradingController_close
+      parameters:
+        - name: tradeId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Trade closed successfully
+      security: *a4
+      summary: Close a trade (admin/cron/demo)
+      tags: *a5
+info:
+  title: Strepple API
+  description: Auto-generated Swagger OpenAPI spec
+  version: "1.0"
+  contact: {}
+tags: []
+servers: []
+components:
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+  schemas:
+    ToggleRoleDto:
+      type: object
+      properties:
+        role:
+          type: string
+          enum:
+            - PRO_TRADER
+            - FOLLOWER
+          example: PRO_TRADER
+      required:
+        - role
+    TopUpDto:
+      type: object
+      properties:
+        amount:
+          type: number
+          example: 500
+          minimum: 1
+      required:
+        - amount
+    CreateUserDto:
+      type: object
+      properties:
+        email:
+          type: string
+          example: alice@streple.com
+        password:
+          type: string
+          example: P@ssw0rd
+      required:
+        - email
+        - password
+    LoginDto:
+      type: object
+      properties:
+        email:
+          type: string
+          example: alice@streple.com
+        password:
+          type: string
+          example: P@ssw0rd
+      required:
+        - email
+        - password
+    SignalDto:
+      type: object
+      properties:
+        symbol:
+          type: string
+          example: BTCUSDT
+        direction:
+          type: string
+          enum:
+            - buy
+            - sell
+        amount:
+          type: number
+          example: 0.1
+        stopLoss:
+          type: number
+          example: 58000
+        takeProfit:
+          type: number
+          example: 62000
+      required:
+        - symbol
+        - direction
+        - amount
+        - stopLoss
+        - takeProfit
+    SubscribeDto:
+      type: object
+      properties:
+        proTraderId:
+          type: string
+          format: uuid
+        allocate:
+          type: number
+          example: 200
+          minimum: 1
+      required:
+        - proTraderId
+        - allocate
+    ExecuteDto:
+      type: object
+      properties:
+        signalId:
+          type: string
+          format: uuid
+      required:
+        - signalId

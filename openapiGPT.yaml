@@ -1,0 +1,180 @@
+openapi: 3.0.3
+info:
+  title: Streple Copy Trading Demo API
+  version: "0.1.0"
+servers:
+  - url: http://localhost:3000
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    CreateUser:
+      type: object
+      required: [email, password]
+      properties:
+        email:    { type: string, format: email }
+        password: { type: string, minLength: 6 }
+    Login:
+      type: object
+      required: [email, password]
+      properties:
+        email:    { type: string, format: email }
+        password: { type: string }
+    TopUpDto:
+      type: object
+      required: [amount]
+      properties:
+        amount:
+          type: number
+          minimum: 1
+    SubscribeDto:
+      type: object
+      required: [proTraderId, allocate]
+      properties:
+        proTraderId: { type: string, format: uuid }
+        allocate:    { type: number, minimum: 1 }
+    SignalDto:
+      type: object
+      required: [symbol, direction, amount, stopLoss, takeProfit]
+      properties:
+        symbol:     { type: string }
+        direction:  { type: string, enum: [buy, sell] }
+        amount:     { type: number }
+        stopLoss:   { type: number }
+        takeProfit: { type: number }
+security:
+  - bearer: []
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateUser" }
+      responses:
+        "201": { description: Created with JWT }
+  /auth/login:
+    post:
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Login" }
+      responses:
+        "200": { description: JWT returned }
+  /users/me:
+    get:
+      tags: [Users]
+      security: [{ bearer: [] }]
+      responses:
+        "200": { description: User info }
+  /users/profile:
+    get:
+      tags: [Users]
+      security: [{ bearer: [] }]
+      responses:
+        "200": { description: Profile info }
+  /users/toggle-role:
+    patch:
+      tags: [Users]
+      security: [{ bearer: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role: { type: string }
+      responses:
+        "200": { description: Role toggled }
+  /users/dashboard:
+    get:
+      tags: [Users]
+      security: [{ bearer: [] }]
+      responses:
+        "200": { description: Dashboard info }
+  /users/demo-balance:
+    get:
+      tags: [Users]
+      security: [{ bearer: [] }]
+      responses:
+        "200": { description: Funding balance }
+  /users/demo-balance/top-up:
+    patch:
+      tags: [Users]
+      security: [{ bearer: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TopUpDto" }
+      responses:
+        "200": { description: New funding balance }
+  /users/wallets:
+    get:
+      tags: [Users]
+      security: [{ bearer: [] }]
+      responses:
+        "200": { description: Copy wallets list }
+  /copy/subscribe:
+    post:
+      tags: [CopyTrading]
+      security: [{ bearer: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SubscribeDto" }
+      responses:
+        "200": { description: Subscribed wallet returned }
+  /copy/signals:
+    post:
+      tags: [CopyTrading]
+      security: [{ bearer: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SignalDto" }
+      responses:
+        "201": { description: Signal published }
+  /copy/execute:
+    post:
+      tags: [CopyTrading]
+      security: [{ bearer: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [signalId]
+              properties:
+                signalId:
+                  type: string
+                  format: uuid
+      responses:
+        "201": { description: Trade executed }
+  /copy/history:
+    get:
+      tags: [CopyTrading]
+      security: [{ bearer: [] }]
+      responses:
+        "200": { description: Execution history }
+  /copy/close/{tradeId}:
+    patch:
+      tags: [CopyTrading]
+      parameters:
+        - name: tradeId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Trade closed }

@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { CopyTradingModule } from './copy-trading/copy-trading.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { AuthModule } from './auth/auth.module';
     TypeOrmModule.forRootAsync({ useFactory: ormConfig }),
     UsersModule,
     AuthModule,
+    CopyTradingModule,
   ],
   // controllers: [AppController],
   // providers: [AppService],

@@ -1,0 +1,167 @@
+{
+  "info": {
+    "name": "Streple Copy-Trading API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base", "value": "http://localhost:3000" },
+    { "key": "proToken", "value": "" },
+    { "key": "followerToken", "value": "" },
+    { "key": "proId", "value": "" },
+    { "key": "signalId", "value": "" },
+    { "key": "tradeId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth > Register Pro",
+      "request": {
+        "method": "POST",
+        "url": "{{base}}/auth/register",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"email\":\"pro@streple.com\",\"password\":\"Pro123\"}" }
+      }
+    },
+    {
+      "name": "Auth > Login Pro",
+      "event": [{
+        "listen": "test",
+        "script": { "exec": ["pm.collectionVariables.set(\"proToken\", pm.response.json().access_token);"] }
+      }],
+      "request": {
+        "method": "POST",
+        "url": "{{base}}/auth/login",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"email\":\"pro@streple.com\",\"password\":\"Pro123\"}" }
+      }
+    },
+    {
+      "name": "Auth > Register Follower",
+      "request": {
+        "method": "POST",
+        "url": "{{base}}/auth/register",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"email\":\"follower@streple.com\",\"password\":\"Follow123\"}" }
+      }
+    },
+    {
+      "name": "Auth > Login Follower",
+      "event": [{
+        "listen": "test",
+        "script": { "exec": ["pm.collectionVariables.set(\"followerToken\", pm.response.json().access_token);"] }
+      }],
+      "request": {
+        "method": "POST",
+        "url": "{{base}}/auth/login",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"email\":\"follower@streple.com\",\"password\":\"Follow123\"}" }
+      }
+    },
+    {
+      "name": "Users > Toggle Role",
+      "request": {
+        "method": "PATCH",
+        "url": "{{base}}/users/toggle-role",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{proToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": { "mode": "raw", "raw": "{\"role\":\"PRO_TRADER\"}" }
+      }
+    },
+    {
+      "name": "Users > Me",
+      "request": {
+        "method": "GET",
+        "url": "{{base}}/users/me",
+        "header": [{ "key": "Authorization", "value": "Bearer {{proToken}}" }]
+      }
+    },
+    {
+      "name": "Users > Top-up Balance",
+      "request": {
+        "method": "PATCH",
+        "url": "{{base}}/users/demo-balance/top-up",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{followerToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": { "mode": "raw", "raw": "{\"amount\":1000}" }
+      }
+    },
+    {
+      "name": "Copy > Subscribe",
+      "event": [{
+        "listen": "prerequest",
+        "script": {
+          "exec": [
+            "pm.sendRequest({",
+            "  url: pm.environment.get('base') + '/users/me',",
+            "  method: 'GET',",
+            "  header: { Authorization: 'Bearer ' + pm.collectionVariables.get('proToken') }",
+            "}, (err, res) => { pm.collectionVariables.set('proId', res.json().id); });"
+          ]
+        }
+      }],
+      "request": {
+        "method": "POST",
+        "url": "{{base}}/copy/subscribe",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{followerToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": { "mode": "raw", "raw": "{\"proTraderId\":\"{{proId}}\",\"allocate\":500}" }
+      }
+    },
+    {
+      "name": "Copy > Publish Signal",
+      "event": [{
+        "listen": "test",
+        "script": { "exec": ["pm.collectionVariables.set('signalId', pm.response.json().id);"] }
+      }],
+      "request": {
+        "method": "POST",
+        "url": "{{base}}/copy/signals",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{proToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"symbol\":\"BTCUSDT\",\"direction\":\"buy\",\"amount\":0.1,\"stopLoss\":58000,\"takeProfit\":62000}"
+        }
+      }
+    },
+    {
+      "name": "Copy > Execute",
+      "request": {
+        "method": "POST",
+        "url": "{{base}}/copy/execute",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{followerToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": { "mode": "raw", "raw": "{\"signalId\":\"{{signalId}}\"}" }
+      }
+    },
+    {
+      "name": "Copy > History",
+      "event": [{
+        "listen": "test",
+        "script": { "exec": ["pm.collectionVariables.set('tradeId', pm.response.json()[0].id);"] }
+      }],
+      "request": {
+        "method": "GET",
+        "url": "{{base}}/copy/history",
+        "header": [{ "key": "Authorization", "value": "Bearer {{followerToken}}" }]
+      }
+    },
+    {
+      "name": "Copy > Close Trade",
+      "request": {
+        "method": "PATCH",
+        "url": "{{base}}/copy/close/{{tradeId}}",
+        "header": [{ "key": "Authorization", "value": "Bearer {{proToken}}" }]
+      }
+    }
+  ]
+}
