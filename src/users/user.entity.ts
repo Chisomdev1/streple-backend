@@ -26,13 +26,13 @@ export class User {
   @Column({ nullable: true })
   avatarUrl?: string;
 
-  @Column({ type: 'jsonb', default: {} })
-  stats: Record<string, any>;         // flexible key‑value
+  @Column({ type: 'json', nullable: true })
+  stats: Record<string, unknown>;
 
   @Column({ default: 0 })
   followerCount: number;
 
-  @Column({ type: 'jsonb', default: [] })
+  @Column({ type: 'json', nullable: true })
   performanceHistory: Array<{ date: string; value: number }>;
 
   /* timestamps */

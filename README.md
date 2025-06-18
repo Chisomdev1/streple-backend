@@ -37,14 +37,17 @@ $ npm install
 # development
 $ npm run start
 
-# spins Postgres 16 on localhost:5432
-$ docker compose up -d
-
 # watch mode
 $ npm run start:dev
 
 # production mode
 $ npm run start:prod
+```
+
+## Spins Postgres 16 on localhost:5432 and MySQL 8.0 on localhost:3306. Starts both databases side‑by‑side
+
+```bash
+$ docker compose up -d
 ```
 
 ## Run tests
