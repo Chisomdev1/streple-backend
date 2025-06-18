@@ -1,5 +1,22 @@
 openapi: 3.0.0
 paths:
+  /:
+    get:
+      operationId: AppController_redirectToDocs
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: &a1
+        - App
+  /info:
+    get:
+      operationId: AppController_getInfo
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a1
   /users/me:
     get:
       operationId: UsersController_me
@@ -7,10 +24,10 @@ paths:
       responses:
         "200":
           description: Decoded JWT payload
-      security: &a1
+      security: &a2
         - bearer: []
       summary: Current user basic JWT payload
-      tags: &a2
+      tags: &a3
         - Users
   /users/profile:
     get:
@@ -19,9 +36,9 @@ paths:
       responses:
         "200":
           description: Returns detailed user profile
-      security: *a1
+      security: *a2
       summary: Full profile
-      tags: *a2
+      tags: *a3
   /users/toggle-role:
     patch:
       operationId: UsersController_toggle
@@ -35,9 +52,9 @@ paths:
       responses:
         "200":
           description: User role updated
-      security: *a1
+      security: *a2
       summary: Switch between PRO_TRADER / FOLLOWER
-      tags: *a2
+      tags: *a3
   /users/dashboard:
     get:
       operationId: UsersController_dashboard
@@ -45,9 +62,9 @@ paths:
       responses:
         "200":
           description: Returns user trading dashboard info
-      security: *a1
+      security: *a2
       summary: Dashboard overview
-      tags: *a2
+      tags: *a3
   /users/demo-balance:
     get:
       operationId: UsersController_demoFunding
@@ -55,9 +72,9 @@ paths:
       responses:
         "200":
           description: Returns user funding balance
-      security: *a1
+      security: *a2
       summary: Funding account balance
-      tags: *a2
+      tags: *a3
   /users/demo-balance/top-up:
     patch:
       operationId: UsersController_topUp
@@ -71,9 +88,9 @@ paths:
       responses:
         "200":
           description: Balance updated successfully
-      security: *a1
+      security: *a2
       summary: Top-up funding balance (DEMO)
-      tags: *a2
+      tags: *a3
   /users/wallets:
     get:
       operationId: UsersController_wallets
@@ -81,9 +98,9 @@ paths:
       responses:
         "200":
           description: Returns wallet balances grouped by trader
-      security: *a1
+      security: *a2
       summary: Per-pro copy wallets
-      tags: *a2
+      tags: *a3
   /auth/register:
     post:
       operationId: AuthController_register
@@ -98,7 +115,7 @@ paths:
         "201":
           description: Returns JWT token
       summary: Register new account
-      tags: &a3
+      tags: &a4
         - Auth
   /auth/login:
     post:
@@ -114,7 +131,7 @@ paths:
         "200":
           description: Returns JWT token
       summary: Login
-      tags: *a3
+      tags: *a4
   /copy/signals:
     post:
       operationId: CopyTradingController_publish
@@ -128,10 +145,10 @@ paths:
       responses:
         "201":
           description: Signal published successfully
-      security: &a4
+      security: &a5
         - bearer: []
       summary: Pro trader publishes signal
-      tags: &a5
+      tags: &a6
         - CopyTrading
   /copy/subscribe:
     post:
@@ -146,9 +163,9 @@ paths:
       responses:
         "201":
           description: Subscription created successfully
-      security: *a4
+      security: *a5
       summary: Follower allocates funds to pro
-      tags: *a5
+      tags: *a6
   /copy/execute:
     post:
       operationId: CopyTradingController_execute
@@ -162,9 +179,9 @@ paths:
       responses:
         "201":
           description: Trade executed successfully
-      security: *a4
+      security: *a5
       summary: Follower executes a signal
-      tags: *a5
+      tags: *a6
   /copy/wallets:
     get:
       operationId: CopyTradingController_wallets
@@ -172,9 +189,9 @@ paths:
       responses:
         "200":
           description: Returns copy wallet per trader
-      security: *a4
+      security: *a5
       summary: Follower copy wallets
-      tags: *a5
+      tags: *a6
   /copy/history:
     get:
       operationId: CopyTradingController_history
@@ -182,9 +199,9 @@ paths:
       responses:
         "200":
           description: Returns trade history with details
-      security: *a4
+      security: *a5
       summary: Follower trade history
-      tags: *a5
+      tags: *a6
   /copy/close/{tradeId}:
     patch:
       operationId: CopyTradingController_close
@@ -197,9 +214,9 @@ paths:
       responses:
         "200":
           description: Trade closed successfully
-      security: *a4
+      security: *a5
       summary: Close a trade (admin/cron/demo)
-      tags: *a5
+      tags: *a6
 info:
   title: Strepple API
   description: Auto-generated Swagger OpenAPI spec

@@ -16,7 +16,7 @@ import { CopyTradingModule } from './copy-trading/copy-trading.module';
     AuthModule,
     CopyTradingModule,
   ],
-  // controllers: [AppController],
-  // providers: [AppService],
+  controllers: [AppController],
+  providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
