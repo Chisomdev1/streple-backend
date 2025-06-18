@@ -31,6 +31,19 @@
 $ npm install
 ```
 
+## Download and Install MySQL Workbench
+
+Download and install MySQL Workbench and the create a new database named `streple_db`
+
+## Containerizing a database server
+
+```bash
+# You can use docker to spin up a Postgres and MySQL
+# The command below spins Postgres 16 on localhost:5432 and MySQL 8.0 on localhost:3306
+# Starts both databases side‑by‑side
+$ docker compose up -d
+```
+
 ## Compile and run the project
 
 ```bash
@@ -42,12 +55,6 @@ $ npm run start:dev
 
 # production mode
 $ npm run start:prod
-```
-
-## Spins Postgres 16 on localhost:5432 and MySQL 8.0 on localhost:3306. Starts both databases side‑by‑side
-
-```bash
-$ docker compose up -d
 ```
 
 ## Run tests
