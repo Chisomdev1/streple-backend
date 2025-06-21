@@ -1,0 +1,21 @@
+
+$loginResponse = Invoke-RestMethod -Uri "http://localhost:3000/auth/login" `
+  -Method POST `
+  -Body (@{
+    email = "demo@example.com"
+    password = "strongpassword"
+  } | ConvertTo-Json) `
+  -ContentType "application/json"
+
+$token = $loginResponse.access_token
+
+# For checking Balance
+Invoke-RestMethod -Uri "http://localhost:3000/demo-balance" `
+  -Method GET `
+  -Headers $headers
+
+
+# Request demo funding
+Invoke-RestMethod -Uri "http://localhost:3000/demo-balance/request" `
+  -Method POST `
+  -Headers @{ Authorization = "Bearer $token" }
