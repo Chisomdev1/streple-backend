@@ -24,6 +24,9 @@ export class User {
   @Column()
   password: string;
 
+  @Column({ nullable: false })
+  fullName: string;
+
   @Column({ type: 'enum', enum: Role, default: Role.FOLLOWER })
   role: Role;
 
@@ -57,6 +60,17 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column({ type: 'varchar', nullable: true })
+  emailVerificationCode: string | null;  
+
+  @Column({ type: 'datetime', nullable: true })
+codeExpiresAt: Date | null;
+
+@Column({ type: 'boolean', default: false })
+isEmailVerified: boolean;
+
+
 
   async validatePassword(pw: string): Promise<boolean> {
     return bcrypt.compare(pw, this.password);

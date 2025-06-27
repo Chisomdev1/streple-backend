@@ -1,9 +1,15 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from '../users/dto/login.dto';
 import { Role } from 'src/users/enums/role.enum';
+import { MailService } from '../mail/mail.service';
+import { User } from '../users/user.entity';
+import { Repository } from 'typeorm';
+
+
 
 export interface JwtPayload {
   sub: string;
@@ -14,6 +20,12 @@ export interface JwtPayload {
 @Injectable()
 export class AuthService {
   constructor(
+
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
+    private readonly mailService: MailService,
+
+
     private readonly users: UsersService,
     private readonly jwt: JwtService,
   ) { }
@@ -45,4 +57,35 @@ export class AuthService {
       expires_in: process.env.JWT_EXPIRES,
     };
   }
+
+  
+  async verifyEmail(email: string, code: string) {
+    const user = await this.userRepo.findOne({ where: { email } });
+  
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+  
+    if (user.isEmailVerified) {
+      return { message: 'Email already verified' };
+    }
+  
+    if (user.emailVerificationCode !== code) {
+      throw new BadRequestException('Invalid code');
+    }
+  
+    if (user.codeExpiresAt && user.codeExpiresAt < new Date()) {
+      throw new BadRequestException('Verification code expired');
+    }
+  
+    user.isEmailVerified = true;
+    user.emailVerificationCode = null;
+    user.codeExpiresAt = null;
+  
+    await this.userRepo.save(user);
+  
+    return { message: 'Email verified successfully' };
+  }
+  
+  
 }

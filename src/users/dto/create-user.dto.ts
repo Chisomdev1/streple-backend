@@ -9,4 +9,9 @@ export class CreateUserDto {
   @IsString()
   @MinLength(6)
   password: string;
+
+  @ApiProperty({ example: 'Alice Smith' })
+  @IsString()
+  @MinLength(2)
+  fullName: string;
 }

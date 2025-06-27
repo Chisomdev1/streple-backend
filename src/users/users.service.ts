@@ -50,6 +50,7 @@ export class UsersService {
       select: [
         'id',
         'email',
+        'fullName',
         'bio',
         'avatarUrl',
         'stats',
@@ -70,6 +71,7 @@ export class UsersService {
     return {
       id: user.id,
       email: user.email,
+      fullName: user.fullName,
       role: user.role,
       bio: user.bio,
       avatarUrl: user.avatarUrl,

@@ -150,6 +150,14 @@ paths:
       summary: Register new account
       tags: &a5
         - Auth
+  /auth/verify-email:
+    post:
+      operationId: AuthController_verifyEmail
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a5
   /auth/login:
     post:
       operationId: AuthController_login
@@ -293,9 +301,13 @@ components:
         password:
           type: string
           example: P@ssw0rd
+        fullName:
+          type: string
+          example: Alice Smith
       required:
         - email
         - password
+        - fullName
     LoginDto:
       type: object
       properties:
