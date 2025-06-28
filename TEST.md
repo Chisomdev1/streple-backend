@@ -1,68 +1,65 @@
-# Full cURL Test‑Drive
-
-Run these commands in terminal
-
-```bash
 # Register users
-curl -s -X POST http://localhost:3000/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"pro@streple.com","password":"Pro123"}'
-
-curl -s -X POST http://localhost:3000/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"follower@streple.com","password":"Follow123"}'
+Invoke-RestMethod -Uri "http://localhost:3000/auth/register" -Method POST -ContentType "application/json" -Body '{"email":"pro@streple.com","password":"Pro123"}'
+Invoke-RestMethod -Uri "http://localhost:3000/auth/register" -Method POST -ContentType "application/json" -Body '{"email":"follower@streple.com","password":"Follow123"}'
 
 # Login and save tokens
-PRO=$(curl -s -X POST http://localhost:3000/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"pro@streple.com","password":"Pro123"}' | jq -r .access_token)
+$proLogin = Invoke-RestMethod -Uri "http://localhost:3000/auth/login" -Method POST -ContentType "application/json" -Body '{"email":"pro@streple.com","password":"Pro123"}'
+$flwLogin = Invoke-RestMethod -Uri "http://localhost:3000/auth/login" -Method POST -ContentType "application/json" -Body '{"email":"follower@streple.com","password":"Follow123"}'
 
-FLW=$(curl -s -X POST http://localhost:3000/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"follower@streple.com","password":"Follow123"}' | jq -r .access_token)
+$PRO = $proLogin.access_token
+$FLW = $flwLogin.access_token
 
 # Upgrade pro to PRO_TRADER
-curl -X PATCH http://localhost:3000/users/toggle-role \
-  -H "Authorization: Bearer $PRO" \
-  -H "Content-Type: application/json" \
-  -d '{"role":"PRO_TRADER"}'
+Invoke-RestMethod -Uri "http://localhost:3000/users/toggle-role" -Method PATCH `
+  -Headers @{ Authorization = "Bearer $PRO"; "Content-Type" = "application/json" } `
+  -Body '{"role":"PRO_TRADER"}'
 
-# Follower top up funding balance
-curl -X PATCH http://localhost:3000/users/demo-balance/top-up \
-  -H "Authorization: Bearer $FLW" \
-  -H "Content-Type: application/json" \
-  -d '{"amount":1000}'
+# Follower top up balance
+Invoke-RestMethod -Uri "http://localhost:3000/users/demo-balance/top-up" -Method PATCH `
+  -Headers @{ Authorization = "Bearer $FLW"; "Content-Type" = "application/json" } `
+  -Body '{"amount":1000}'
 
 # Get Pro ID
-PRO_ID=$(curl -s -H "Authorization: Bearer $PRO" http://localhost:3000/users/me | jq -r .id)
+$me = Invoke-RestMethod -Uri "http://localhost:3000/users/me" -Headers @{ Authorization = "Bearer $PRO" }
+$PRO_ID = $me.id
 
 # Subscribe follower to Pro
-curl -X POST http://localhost:3000/copy/subscribe \
-  -H "Authorization: Bearer $FLW" \
-  -H "Content-Type: application/json" \
-  -d "{\"proTraderId\":\"$PRO_ID\",\"allocate\":500}"
+Invoke-RestMethod -Uri "http://localhost:3000/copy/subscribe" -Method POST `
+  -Headers @{ Authorization = "Bearer $FLW"; "Content-Type" = "application/json" } `
+  -Body "{ \"proTraderId\": \"$PRO_ID\", \"allocate\": 500 }"
 
 # Pro publishes a signal
-SIG=$(curl -s -X POST http://localhost:3000/copy/signals \
-  -H "Authorization: Bearer $PRO" \
-  -H "Content-Type: application/json" \
-  -d '{"symbol":"BTCUSDT","direction":"buy","amount":0.1,"stopLoss":58000,"takeProfit":62000}' | jq -r .id)
+$signal = Invoke-RestMethod -Uri "http://localhost:3000/copy/signals" -Method POST `
+  -Headers @{ Authorization = "Bearer $PRO"; "Content-Type" = "application/json" } `
+  -Body '{"symbol":"BTCUSDT","direction":"buy","amount":0.1,"stopLoss":58000,"takeProfit":62000}'
+$SIG = $signal.id
 
 # Follower executes signal
-curl -X POST http://localhost:3000/copy/execute \
-  -H "Authorization: Bearer $FLW" \
-  -H "Content-Type: application/json" \
-  -d "{\"signalId\":\"$SIG\"}"
+Invoke-RestMethod -Uri "http://localhost:3000/copy/execute" -Method POST `
+  -Headers @{ Authorization = "Bearer $FLW"; "Content-Type" = "application/json" } `
+  -Body "{ \"signalId\": \"$SIG\" }"
 
-# View wallets & trade history
-curl -H "Authorization: Bearer $FLW" http://localhost:3000/users/wallets | jq
-curl -H "Authorization: Bearer $FLW" http://localhost:3000/copy/history | jq
+# View follower wallet and trade history
+Invoke-RestMethod -Uri "http://localhost:3000/users/wallets" -Headers @{ Authorization = "Bearer $FLW" } | ConvertTo-Json -Depth 10
+Invoke-RestMethod -Uri "http://localhost:3000/copy/history" -Headers @{ Authorization = "Bearer $FLW" } | ConvertTo-Json -Depth 10
 
-# Close trade (admin or cron)
-TRADE=$(curl -s -H "Authorization: Bearer $FLW" http://localhost:3000/copy/history | jq -r '.[0].id')
-curl -X PATCH http://localhost:3000/copy/close/$TRADE
+# Close trade (use first trade ID)
+$history = Invoke-RestMethod -Uri "http://localhost:3000/copy/history" -Headers @{ Authorization = "Bearer $FLW" }
+$TRADE = $history[0].id
 
-# Check final funding balance
-curl -H "Authorization: Bearer $FLW" http://localhost:3000/users/demo-balance | jq
+Invoke-RestMethod -Uri "http://localhost:3000/copy/close/$TRADE" -Method PATCH
 
-```
+# Final balance check
+Invoke-RestMethod -Uri "http://localhost:3000/users/demo-balance" -Headers @{ Authorization = "Bearer $FLW" } | ConvertTo-Json -Depth 10
+
+# For login as a pro
+$proLogin = Invoke-RestMethod -Uri "http://localhost:3000/auth/login" -Method POST `
+  -ContentType "application/json" `
+  -Body '{"email":"pro@streple.com","password":"Protader"}'
+
+$PRO = $proLogin.access_token
+
+# For posting signals
+$signal = Invoke-RestMethod -Uri "http://localhost:3000/copy/signals" -Method POST `
+  -Headers @{ Authorization = "Bearer $PRO"; "Content-Type" = "application/json" } `
+  -Body '{"symbol":"BTCUSDT","direction":"buy","amount":0.1,"stopLoss":58000,"takeProfit":62000}'

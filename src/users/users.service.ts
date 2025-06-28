@@ -44,6 +44,15 @@ export class UsersService {
     return this.repo.save(user);
   }
 
+  async save(user: User): Promise<User> {
+    return this.repo.save(user);
+  }
+  
+  async update(id: string, data: Partial<User>) {
+    await this.repo.update(id, data as any); // Quick fix (not type-safe)
+    return this.repo.findOne({ where: { id } });
+  }
+  
   async getProfile(userId: string) {
     const user = await this.repo.findOne({
       where: { id: userId },

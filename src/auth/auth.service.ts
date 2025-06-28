@@ -7,6 +7,7 @@ import { LoginDto } from '../users/dto/login.dto';
 import { Role } from 'src/users/enums/role.enum';
 import { MailService } from '../mail/mail.service';
 import { User } from '../users/user.entity';
+import { DemoBalanceService } from '../demo-balance/demo-balance.service';
 import { Repository } from 'typeorm';
 
 
@@ -24,7 +25,7 @@ export class AuthService {
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     private readonly mailService: MailService,
-
+    private readonly demoBalanceService: DemoBalanceService,
 
     private readonly users: UsersService,
     private readonly jwt: JwtService,
@@ -37,7 +38,13 @@ export class AuthService {
     }
 
     const user = await this.users.create(dto);
-    const payload = { sub: user.id, email: user.email, role: user.role };
+    const payload = { sub: user.id, email: user.email, fullName: user.fullName, role: user.role };
+
+    const createdBalance = await this.demoBalanceService.requestDemoBalance(user);
+    user.demoFundingBalance = createdBalance.balance;
+    await this.users.save(user);
+    
+
     return this.makeJwt(payload);
   }
 

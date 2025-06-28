@@ -2,8 +2,8 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { User } from '../users/user.entity';
 import { CopyWallet } from '../copy-trading/entities/copy-wallet.entity';
 import { DemoBalance } from '../demo-balance/demo-balance.entity'; // ✅ Add this import
-// import { CopyTrade } from '../copy-trading/entities/copy-trade.entity';
-// import { ProSignal } from '../copy-trading/entities/pro-signal.entity';
+import { CopyTrade } from '../copy-trading/entities/copy-trade.entity';
+import { ProSignal } from '../copy-trading/entities/pro-signal.entity';
 
 export default (): TypeOrmModuleOptions => ({
   type: 'mysql',
@@ -16,8 +16,8 @@ export default (): TypeOrmModuleOptions => ({
     User,
     CopyWallet,
     DemoBalance,
-    // CopyTrade,
-    // ProSignal,
+    CopyTrade,
+    ProSignal,
   ],
   synchronize: true,
 

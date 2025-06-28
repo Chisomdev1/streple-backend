@@ -12,6 +12,7 @@ import { JwtStrategy } from './jwt.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CopyTradingModule } from 'src/copy-trading/copy-trading.module';
 import { CopyWallet } from 'src/copy-trading/entities/copy-wallet.entity';
+import { DemoBalanceModule } from '../demo-balance/demo-balance.module'; 
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { CopyWallet } from 'src/copy-trading/entities/copy-wallet.entity';
     MailModule,
     PassportModule,
     ConfigModule,
+    DemoBalanceModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -34,6 +36,6 @@ import { CopyWallet } from 'src/copy-trading/entities/copy-wallet.entity';
   ],
   providers: [AuthService, JwtStrategy, UsersService],
   controllers: [AuthController],
-  exports: [AuthService, JwtModule],
+  exports: [AuthService, JwtModule ],
 })
 export class AuthModule {}
