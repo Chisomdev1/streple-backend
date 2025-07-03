@@ -60,7 +60,14 @@ export class DemoBalanceService {
     }
 
     balance.balance -= amount;
+    user.demoFundingBalance = balance.balance;
+    await this.usersService.save(user);
     await this.balanceRepo.save(balance);
+
+    // Check if balance is low and provide recommendations
+    if (balance.balance < 100) {
+      throw new BadRequestException('Low balance. Please review our trading guides and educational resources to improve your trading strategy.');
+    }
   }
 
   async topUp(user: User): Promise<DemoBalance> {
@@ -68,13 +75,19 @@ export class DemoBalanceService {
 
     if (!balance) throw new BadRequestException('No demo balance found.');
 
+    // Check if user qualifies for bonus
+    if (balance.balance >= 1000) {
+      balance.balance += 4000; // Add bonus
+      balance.lastTopUp = new Date();
+      user.demoFundingBalance = balance.balance;
+      await this.usersService.save(user);
+      return this.balanceRepo.save(balance);
+    }
+
     balance.balance = 500;
     balance.lastTopUp = new Date();
-
-    // ✅ Corrected: use `balance`, not `demoBalance`
-    await this.usersService.update(user.id, {
-      demoFundingBalance: balance.balance,
-    });
+    user.demoFundingBalance = balance.balance;
+    await this.usersService.save(user);
 
     return this.balanceRepo.save(balance);
   }

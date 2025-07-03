@@ -243,6 +243,16 @@ paths:
       security: *a6
       summary: Follower trade history
       tags: *a7
+  /copy/trade:
+    post:
+      operationId: CopyTradingController_basicTrade
+      parameters: []
+      responses:
+        "200":
+          description: Trade executed directly
+      security: *a6
+      summary: Execute a basic trade (buy/sell)
+      tags: *a7
   /copy/close/{tradeId}:
     patch:
       operationId: CopyTradingController_close

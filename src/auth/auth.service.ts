@@ -44,7 +44,6 @@ export class AuthService {
     user.demoFundingBalance = createdBalance.balance;
     await this.users.save(user);
     
-
     return this.makeJwt(payload);
   }
 
